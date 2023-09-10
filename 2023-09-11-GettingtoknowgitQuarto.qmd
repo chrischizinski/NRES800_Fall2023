@@ -12,6 +12,44 @@ We are going to be using a document generating framework (Quarto, built off of R
 
 Lots of help can be found [here](https://quarto.org/docs/guide/)
 
+## Rprojects
+
+A project file (with an .Rproj extension) within the project directory. \* `foldername.Rproject`
+
+-   R projects are a great tool for helping us organize and manage collections of files especially when combined with github.
+
+-   Allow us to use relative file paths instead of absolute file paths
+
+-   Relative:
+
+    -   `data/zip_to_county_2022.csv`
+
+-   Absolute:
+
+    -   `/Users/cchizinski2/Documents/git/ngpc_requests/data/zip_to_county_2022.csv`
+
+## Structure of Rprojects is important
+
+```{r}
+#| echo: false
+#| results: markup
+
+fs::dir_tree(getwd(), recurse = FALSE, max_depth = 3)
+
+```
+
+1. `R` or `src` directory to store R scripts
+2. `_output` folder to contained rendered documents
+3. `figs` a folder to output figures generated in code
+4. `img` a folder of images used in the document
+5. `data` or a `raw_data` folder to contain the ORIGINAL data.  If you are generating other files during your process, place the in another folder or subfolder
+6. should contain a host of files 
+    * `README.md` is a document that explains the project
+    * `_quarto.yml` a file to explain rendering preferences of the project
+    * `*.Rproj`  the r project file
+    * `*.R`, `*.rmd`, or `.qmd` files used to conduct the analyses
+    
+
 ### YAML
 
 Open a new Quarto (.qmd) file in your project, change the author name to your name, and click "render".
