@@ -1,0 +1,210 @@
+---
+title: "NRES 800: Sampling, data management, and visualization <br> <br> Working with git, rmarkdown, and projects"
+date: today
+title-slide-attributes: # this is if you want a background image on the title screen. Use the right path to the image you want
+  data-background-image: "img/fabio-oyXis2kALVg-unsplash.jpg"
+  data-background-opacity: "0.35"
+format: 
+  revealjs:
+    theme: [dark, custom.scss]
+    highlight-style: github
+    logo: img/huskeRs.png
+    transition: fade
+    width: 1600
+    height: 900
+    self-contained: true
+knitr:
+  opts_chunk: 
+    collapse: true
+execute:
+  echo: true
+from: markdown+emoji
+---
+
+## 1. Git
+
+::: columns
+::: {.column width="40%"}
+One of the best resources out there: [happygitwithr](https://happygitwithr.com/)
+
+-   Instructions on getting all the pieces to 'talk' to each other
+-   Fundamentals
+:::
+
+::: {.column width="60%"}
+![](https://octodex.github.com/images/NUX_Octodex.gif)
+:::
+:::
+
+## 1. Git
+
+::: columns
+::: {.column width="60%"}
+-   Git is a version control system
+
+-   Git manages the evolution of a set of files -- called a repository -- in a sane, highly structured way
+
+-   Re-purposed by the data science community
+
+    -   source code,
+    -   manage files that make up typical data analytical projects
+        -   data
+        -   figures
+        -   reports
+        -   source code
+:::
+
+::: {.column width="40%"}
+\
+\
+\
+
+![](https://github.com/allisonhorst/stats-illustrations/blob/main/github-illustrated-series/github_compare_text.png?raw=true)
+:::
+:::
+
+------------------------------------------------------------------------
+
+![](https://science-for-nature-and-people.github.io/2020-data-collab-workshop/2020-02-snapp/images/phd_comics_final.png){fig-align="center" width="880"}
+
+## Basic workflow {background-color="white"}
+
+![](https://science-for-nature-and-people.github.io/2020-data-collab-workshop/2020-02-snapp/images/repo-synched.png){fig-align="center"}
+
+## Collaborative workflow {background-color="white"}
+
+![](https://owi.usgs.gov/R/training-curriculum/r-package-dev/static/img/github_workflow_generic.png#inline-img){fig-align="center" style="background-color: white;" width="1522"}
+
+## How will we use Git and GitHub?
+
+![](img/whole-game-01.png)
+
+## How will we use Git and GitHub?
+
+![](img/whole-game-02.png)
+
+## How will we use Git and GitHub?
+
+![](img/whole-game-03.png)
+
+## How will we use Git and GitHub?
+
+![](img/whole-game-04.png)
+
+## Git and GitHub tips
+
+-   There are millions of git commands -- ok, that's an exaggeration, but there are a lot of them -- and very few people know them all. 99% of the time you will use git to add, commit, push, and pull.
+
+-   We will be doing Git things and interfacing with GitHub through RStudio, but if you google for help you might come across methods for doing these things in the command line -- skip that and move on to the next resource unless you feel comfortable trying it out.
+
+-   There is a great resource for working with git and R: [happygitwithr.com](http://happygitwithr.com/). Some of the content in there is beyond the scope of this course, but it's a good place to look for help.
+
+## Burn it all down :fire: {style="font-size: 0.75em;"}
+
+::: columns
+::: {.column width="60%"}
+Basic idea:
+
+-   Commit early and often.
+-   Push to a remote, like GitHub, often.
+-   The state of things on GitHub is your new "worst case scenario".
+-   If you really screw things up locally, copy all the files (or the ones that have changed) to a safe place.
+-   Usually your files are JUST FINE. But it is easy to goof up the Git infrastructure when you're new at this. And it can be hard to get that straightened out on your own.
+-   Rename the existing local repo as a temporary measure, i.e. before you do something radical, like delete it.
+-   Clone the repo from GitHub to your local machine. You are back to a happy state.
+-   Copy all relevant files back over from your safe space. The ones whose updated state you need to commit.
+-   Stage and commit. Push.
+-   Carry on with your life.
+:::
+
+::: {.column width="40%"}
+\
+
+![](https://imgs.xkcd.com/comics/git_2x.png){width="450" fig-align="right"}
+:::
+:::
+
+## Getting started
+
+::: columns
+::: {.column width="50%"}
+Our class will start to begin with the following steps.
+
+1.  Click on the assignment link that you should have received via canvas to create your GitHub repository (which we'll refer to as "repo" going forward) for the in class work.
+
+The repos will contain a templates that you can build on to complete your assignment.
+
+2.  On GitHub, click on the green **Clone or download** button, select **Use HTTPS**. Click on the clipboard icon to copy the repo URL.
+:::
+
+::: {.column width="50%"}
+\
+\
+
+![](img/clone-repo-link.png){width="700" fig-align="right"}
+:::
+:::
+
+------------------------------------------------------------------------
+
+::: columns
+::: {.column width="60%"}
+3.  In RStudio, click on "New Project" under the file tab.
+
+4.  Then click on "Version Control"
+
+5.  Then click on "Git"
+
+6.  Under "Respository URL" paste in the link that you copied from github
+
+7.  It should specify the repository name in the next line. If not name the repository.
+
+8.  Specify the directory on your computer that you wish to clone the directory to. I house all my git repository in a single directory in `~/Documents/git` but this can vary depend on your computer.
+
+Rstudio will clone the repository and then open a new session in an Rproject
+:::
+
+::: {.column width="40%"}
+![](img/RstudiGit.png){width="480" fig-align="center"}
+:::
+:::
+
+## Rprojects
+
+A project file (with an .Rproj extension) within the project directory. \* `foldername.Rproject`
+
+-   R projects are a great tool for helping us organize and manage collections of files especially when combined with github.
+
+-   Allow us to use relative file paths instead of absolute file paths
+
+-   Relative:
+
+    -   `data/zip_to_county_2022.csv`
+
+-   Absolute:
+
+    -   `/Users/cchizinski2/Documents/git/ngpc_requests/data/zip_to_county_2022.csv`
+
+## Structure of Rprojects is important
+
+```{r}
+#| echo: false
+#| results: markup
+
+fs::dir_tree("/Users/cchizinski2/Documents/git/classes/nres800-quarto-assignment", recurse = FALSE, max_depth = 1)
+
+
+```
+
+1. `R` or `src` directory to store R scripts
+2. `_output` folder to contained rendered documents
+3. `figs` a folder to output figures generated in code
+4. `img` a folder of images used in the document
+5. `data` or a `raw_data` folder to contain the ORIGINAL data.  If you are generating other files during your process, place the in another folder or subfolder
+6. should contain a host of files 
+    * `README.md` is a document that explains the project
+    * `_guarto.yml` a file to explain rendering preferences of the project
+    * `*.Rproj`  the r project file
+    * `*.R`, `*.rmd`, or `.qmd` files used to conduct the analyses
+    
+##
