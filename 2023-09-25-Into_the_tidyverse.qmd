@@ -1,0 +1,285 @@
+---
+title: "Working the tidyverse"
+subtitle: "Day 1"
+author: Chris Chizinski
+date: today
+format:
+  html:
+    embed-resources: true
+---
+
+## Basic Info
+
+```{r}
+options(stringsAsFactors = FALSE)
+
+# .libPaths("/Users/cchizinski2/Documents/RLibrary") # needs to be forward "/" or double "\\"
+.libPaths()
+```
+
+## Load library
+
+```{r}
+# install.packages("tidyverse")
+library(tidyverse)
+# install.packages("hflights")
+library(hflights) # load the library hflights
+```
+
+
+
+
+
+## tidyr 
+
+Why use 'tidyr' and 'dplyr'?
+
+1. Compared to many other packages and Base R, these are REALLY fast
+2. Readibility - the way the commands are written, flows like a 'paragraph'
+3. Chaining - you can connect multiple function into a 'paragraph'
+4. Integrates with ggplot2 - our graphics go to
+
+* Concept of tidyr and dplyr follow the tidy data concept
+
+* Backbone to chaining is the pipe %>% (originates in the magittr package 
+* The shortcuts for the pipe are 'cntrl-shift-M' in PC or 'cmd-shift-M' in mac
+
+* tidyr is designed to manipulate datasets, allowing you to go between long and wide formats, fill in missing values and combinations of data, allows you to separate or merge columns, rename and create new variables, and summrize data according to grouping variables
+
+## tidy data 
+* each variable forms a column
+* each observation forms a row
+* each type of observational unit forms a table 
+
+### The main verbs in tidyr 
+1. gather() but now called pivot_longer()
+2. spread() but now called pivot_wider()
+3. separate() and unite()
+4. complete() turns implicit missing to explicit missing by completing missing data combinations  
+
+# The main verbs in dplyr are
+1. filter() selects specific rows based on user-defined criteria
+2. select() selects specific columns based on user-defined criteria
+3. arrange() puts rows in order based on a criteria
+4. mutate() change or create a column
+5. summarise() reduces your data to a 'summary' of your data
+6. group_by() creates groups that can be operated on  
+
+# Lets wrangle 
+
+## going from wide to long
+
+```{r}
+fish_encounters  # go from wide to long format
+?fish_encounters
+
+length(unique(fish_encounters$fish))
+length(unique(fish_encounters$station))
+
+fish_encounters |> 
+  pivot_wider(names_from = station,
+              values_from = seen,
+              values_fill = list(seen = 0)) -> fish_encounters_wide
+
+dim(fish_encounters_wide)
+
+```
+
+## going long to wide
+```{r}
+
+ # make this dataset long
+
+names(billboard)
+
+billboard$wk1
+billboard |> 
+  pivot_longer(wk1:wk76,
+               names_to =  "week",
+               values_to = "values")
+
+billboard |> 
+  pivot_longer(contains('wk'),
+               names_to =  "week",
+               values_to = "values")
+
+billboard |> 
+  pivot_longer(c(-artist,-track,-date.entered),
+               names_to =  "week",
+               values_to = "values")
+```
+
+::: {.callout-note appearance="simple"}
+
+## Challenge 1
+
+Using the dataset `us_rent_income` move from long to wide format for  `income` and `rent` simultaneously
+
+:::
+
+
+```{r}
+## Challenge 1
+us_rent_income |> 
+  pivot_wider(names_from = variable,
+              values_from = c(estimate, moe))
+
+```
+
+
+::: {.callout-note appearance="simple"}
+
+## Challenge 2
+
+Using the a subset of the dataset `warpbreaks` move from long to wide format for columns A and B.  A and B should be the mean value for each of the three tensions.
+
+Result should look like:
+
+```{r}
+#| eval: false
+# A tibble: 3 × 3
+  tension     A     B
+  <fct>   <dbl> <dbl>
+1 L        44.6  28.2
+2 M        24    28.8
+3 H        24.6  18.8
+```
+
+
+:::
+
+```{r}
+# Challenge 2
+warpbreaks |> 
+  select(wool,tension, breaks) |> 
+  as_tibble() |> 
+  pivot_wider(names_from = wool,
+              values_from = breaks,
+              values_fn = list(breaks = mean))
+```
+
+## separating columns 
+
+```{r}
+mtcars |> # mtcars dataset 
+  rownames_to_column("make_model") |> 
+  as_tibble() |> 
+  separate(make_model,
+           c("make","model"),
+           sep = " ",
+           extra = "merge",
+           fill = "right",
+           remove = FALSE)
+
+?separate
+
+```
+
+## Combine columns 
+
+```{r}
+set.seed(12345)
+
+date <- seq(as.Date("2023-09-01"), as.Date("2023-09-15"), by = "day")
+hour <- sample(1:24, 15) # randomly sample 1 through 24, choosing 15 random numbers
+min <- sample(0:59, 15) # randomly sample 1 through 59, choosing 15 random numbers
+sec <- sample(0:59, 15) # randomly sample 1 through 59, choosing 15 random numbers
+event <- sample(letters, 15) #choose 15 random letters
+
+madeUpData <- data.frame(date = date,
+                         hour = hour, 
+                         min = min,
+                         sec = sec, 
+                         event = event)
+madeUpData
+```
+
+::: {.callout-note appearance="simple"}
+
+## Challenge 3
+ 
+1. Load package `lubridate`
+
+2. combine hour, min, sec into a single column called time, with the appropriate separators
+
+3. create a dateTime column that combines the date and the newly created time column. Retain the original date and time columns
+
+4. using `lubridate`, you will convert the dateTime column to a datetime class
+
+5. create a new column that is the day of the week as a character (e.g., monday tuesday wednesday)
+
+The first six rows should look like:
+
+```{r}
+#| eval: false
+  dateTime            date       time     event
+  <dttm>              <date>     <chr>    <chr>
+1 2019-09-01 14:11:31 2019-09-01 14:11:31 s    
+2 2019-09-02 19:19:24 2019-09-02 19:19:24 m    
+3 2019-09-03 16:07:35 2019-09-03 16:7:35  c    
+4 2019-09-04 11:59:39 2019-09-04 11:59:39 q    
+5 2019-09-05 02:02:10 2019-09-05 2:2:10   j    
+6 2019-09-06 21:08:37 2019-09-06 21:8:37  k
+```
+:::
+
+```{r}
+#| label: Challenge3
+
+madeUpData |> 
+  as_tibble() |> 
+  unite(c(hour, min, sec),
+        col = "time",
+        sep = ":") |> 
+  unite(c(date, time),
+        col = "date_time",
+        sep = " ",
+        remove = FALSE) |> 
+  mutate(date_time = ymd_hms(date_time),
+         weekdayz = wday(date_time,
+                         label = TRUE,
+                         abbr = FALSE))
+
+?lubridate
+
+```
+
+
+## complete()
+
+The first thing we will do is to create "fake" data to run our complete.
+
+```{r }
+#| label: fakedata
+
+fakeData <- data.frame(group = c(1:2,1),
+                       item_id = c(3:4,4),
+                       item_name = c("a", "b", "b"),
+                       value1 = c(1:3),
+                       value2 = c(4:6))
+fakeData
+```
+
+
+Now lets use complete to fill in the missing combinations 
+
+```{r }
+#| label: usecomplete
+
+fakeData |> 
+  complete(group, nesting(item_id, item_name))
+  
+```
+
+By default `complete()` fills in missing lines with `NA`.  We can fill it in with other information if we wish. 
+
+```{r }
+#| label: completezeros
+
+fakeData |> 
+  complete(group, nesting(item_id, item_name),
+           fill = list(value1 = 0,
+                       value2 = 0))
+
+```
+
