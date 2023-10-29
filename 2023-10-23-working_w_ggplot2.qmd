@@ -1,0 +1,422 @@
+---
+title: "Working with ggplot2"
+subtitle: "NRES 800, Fall 2023"
+format: 
+  revealjs:
+    code-overflow: wrap
+    chalkboard: true
+    theme: [default]
+    code-tools: true
+    transition: fade
+    width: 1600
+    height: 900
+    self_contained: true
+execute:
+  echo: true
+---
+
+## Needed packages and files
+```{r}
+#| label: load-packages
+#| message: false
+#| include: false
+
+# install.packages('pak')
+
+# pak::pak(c("here","scales","camcorder", "patchwork", "skimr", "ggthemes", "gt"))
+
+library(tidyverse)
+library(ggthemes)
+library(palmerpenguins)
+library(gt)
+```
+
+We will make use of custom fonts during the course. If you want to follow all contents locally, make sure the following typefaces are installed:
+
+Asap: [fonts.google.com/specimen/Asap](fonts.google.com/specimen/Asap)
+
+Spline Sans: [fonts.google.com/specimen/Spline+Sans](https://fonts.google.com/specimen/Spline+Sans)
+
+Spline Sans Mono: [fonts.google.com/specimen/Spline+Sans+Mono](https://fonts.google.com/specimen/Spline+Sans+Mono)
+
+Hepta Slab: [fonts.google.com/specimen/Hepta+Slab](https://fonts.google.com/specimen/Hepta+Slab)
+
+
+You can download all typefaces as a single zip file [here](https://cedricscherer.com/files/positconf-dataviz-ggplot2-fonts.zip).
+
+
+## Data {.scrollable}
+
+```{r}
+#| label: load-data
+#| message: false
+
+bikes <- 
+  read_csv("https://raw.githubusercontent.com/posit-conf-2023/dataviz-ggplot2/main/data/london-bikes-custom.csv",
+           col_types = "Dcfffilllddddc")
+
+skimr::skim(bikes)
+
+```
+
+## Walk through - data & aesthetics (aes)
+
+```{r}
+#| label: walk-through2
+#| output-location: column
+#| code-overflow: scroll
+#| code-line-numbers: "1"
+#| fig-align: center
+
+
+ggplot(data = bikes, aes(x = temp_feel, y = count)) +              # initial call + data + aesthetics
+  geom_point()                      # geometric layer
+```
+
+## Walk through - data & aesthetics (aes)
+```{r}
+#| label: walk-through1
+#| output-location: column
+#| code-overflow: scroll
+#| code-line-numbers: "2"
+#| fig-align: center
+
+ggplot() +              # initial call + data
+  geom_point(data = bikes, aes(x = temp_feel, y = count))                      # aesthetics + geometric layer
+```
+
+## Walk through - smoothers 1
+
+```{r}
+#| label: walk-through3
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(data = bikes, 
+       aes(x = temp_feel, y = count)) +   
+  geom_point() +
+  geom_smooth(method = "lm") 
+
+```
+
+## Walk through - smoothers 2
+
+```{r}
+#| label: walk-through4
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(data = bikes, 
+       aes(x = temp_feel, y = count)) +   
+  geom_point() +
+  geom_smooth(method = "gam") 
+
+```
+
+## Walk through - smoothers 3
+
+```{r}
+#| label: walk-through5
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(data = bikes, 
+       aes(x = temp_feel, y = count, group = day_night, color = day_night)) +   
+  geom_point() +
+  geom_smooth(color = "black",
+              fill = "green",
+              alpha = 0.75)
+
+```
+
+## Walk through - smoothers 4
+
+```{r}
+#| label: walk-through6
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(data = bikes, 
+       aes(x = temp_feel, y = count, group = day_night, color = day_night)) +   
+  geom_smooth(color = "black",
+              fill = "green",
+              alpha = 0.75) +
+  geom_point(alpha = 0.55,
+             size = 1.5,
+             shape = 21,
+             fill = "blue")
+
+```
+
+## Walk through - shapes
+
+```{r}
+#| label: walk-through7
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(data = bikes, 
+       aes(x = temp_feel, y = count, 
+           group = day_night, 
+           color = day_night,
+           shape = day_night)) +   
+  geom_smooth(color = "black",
+              fill = "green",
+              alpha = 0.75) +
+  geom_point(alpha = 0.55,
+             size = 1.5)
+
+```
+
+## Walk through - shapes
+
+```{r}
+#| label: walk-through8
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(data = bikes, 
+       aes(x = temp_feel, y = count, 
+           group = day_night, 
+           color = day_night,
+           shape = day_night)) +   
+  geom_point(alpha = 0.55,
+             size = 1.5) +
+    geom_smooth(color = "black",
+                linetype = "dotted",
+                linewidth =  3) 
+
+```
+
+## Walk through - faceting
+
+```{r}
+#| label: walk-through9
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(bikes, 
+       aes(x = temp_feel, 
+                  y = count)) + 
+  geom_point( aes(color = season), 
+    alpha = .5, 
+    size = 1.5) + 
+  stat_smooth(
+    method = "lm", color = "black") +
+  facet_wrap(facets = vars(day_night),
+             nrow = 2) # also: ~day_night
+
+```
+
+## Walk through - facet_grid
+
+```{r}
+#| label: walk-through10
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(bikes, 
+       aes(x = temp_feel, 
+                  y = count)) + 
+  geom_point( aes(color = season), 
+    alpha = .5, 
+    size = 1.5) + 
+  stat_smooth(
+    method = "lm", color = "black") +
+  facet_grid(rows = vars(day_night),
+             cols = vars(year)) # also: day_night ~ year
+
+```
+
+## Walk through - facet_grid
+
+```{r}
+#| label: walk-through11
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+ggplot(bikes, 
+       aes(x = temp_feel, 
+                  y = count)) + 
+  geom_point( aes(color = season), 
+    alpha = .5, 
+    size = 1.5) + 
+  stat_smooth(
+    method = "lm", color = "black") +
+  facet_grid(rows = vars(day_night),
+             cols = vars(year),
+             scales = "free_y",
+             space = "free_y") # also: day_night ~ year
+```
+
+## Walk through 
+
+```{r}
+#| label: walk-through12
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+g1 <-
+  ggplot(bikes, 
+       aes(x = temp_feel, 
+                  y = count)) + 
+  geom_point( aes(color = season), 
+    alpha = .5, 
+    size = 1.5) + 
+  stat_smooth(
+    method = "lm", color = "black") +
+  facet_grid(rows = vars(day_night),
+             cols = vars(year),
+             scales = "free_y",
+             space = "free_y") # also: day_night ~ year
+
+```
+
+## Walk through - Axis scaling
+
+```{r}
+#| label: walk-through13
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+g1 +
+  scale_x_continuous(
+    labels = function(x) paste0(x, "°C"), # <1>
+    breaks = seq(-1, 30, by = 5)) # <2>
+
+```
+
+1. This adds in a degree celcius symbol after each number
+2. Change the number breaks on the x axis
+
+## Walk through - Axis scaling
+
+```{r}
+#| label: walk-through14
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+g2<- 
+  g1 +
+    scale_x_continuous(
+      labels = function(x) paste0(x, "°C"), 
+      breaks = seq(-1, 30, by = 5)) +
+    scale_y_continuous(
+      # add comma separator
+      labels = scales::label_comma(),
+      breaks = seq(0, 50000, by = 10000))
+
+```
+
+## Walk through - color palette
+
+```{r}
+#| label: walk-through15
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+# g2 +
+#   # use a custom color palette for season colors
+#   scale_color_manual(
+#     values = c("autumn" = "#6681FE", "spring" =  "#1EC98D", "summer" = "#F7B01B",  "winter" = "#A26E7C")
+#   )
+
+colorz <- c("autumn" = "#6681FE", "spring" =  "#1EC98D", "summer" = "#F7B01B",  "winter" = "#A26E7C")
+
+g2 +
+#   # use a custom color palette for season colors
+  scale_color_manual(values = colorz)
+```
+
+## Walk through - color palette
+
+```{r}
+#| label: walk-through15
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+g2 +
+#   # use a custom color palette for season colors
+  scale_color_manual(
+    values = colorz,
+    labels = c("Winter", "Spring", "Summer", "Autumn"))
+
+```
+
+## Walk through - change labels
+
+```{r}
+#| label: walk-through16
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+g3 <- 
+  g2 +
+#   # use a custom color palette for season colors
+  scale_color_manual(
+    values = colorz,
+    labels = c("Winter", "Spring", "Summer", "Autumn")) +
+  labs(
+    # overwrite axis and legend titles
+    x = "Average feels-like temperature", 
+    y = NULL, 
+    color = NULL,
+    # add plot title and caption
+    title = "Trends of Reported Bike Rents versus Feels-Like Temperature in London",
+    caption = "Data: TfL (Transport for London), Jan 2015–Dec 2016"
+  )
+
+```
+
+## Walk through - apply theme
+
+```{r}
+#| label: walk-through17
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+g3 +
+  theme_light(base_size = 22, base_family = "Courier New") 
+```
+
+
+## Walk through - apply theme
+
+```{r}
+#| label: walk-through17
+#| output-location: column
+#| code-overflow: scroll
+#| fig-align: center
+
+g3 +
+  theme_bw(base_size = 14) +
+  theme(plot.background = element_rect(fill = "black",
+                                       color = "black"),
+        axis.text = element_text(color = "white"),
+        axis.title = element_text(color = "white"),
+        legend.background = element_rect(fill = "black",
+                                       color = "black"),
+        legend.text = element_text(color = "white"),
+        legend.title = element_blank(),
+        legend.key = element_rect(fill = NA),
+        strip.background = element_blank(),
+        strip.text = element_text(color = "white"),
+        panel.background = element_blank(),
+        panel.border = element_blank(),
+        panel.grid = element_blank())
+```
