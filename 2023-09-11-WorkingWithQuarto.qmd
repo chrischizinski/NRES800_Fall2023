@@ -1,0 +1,78 @@
+---
+title: "Working with quarto and git"
+author: 
+  - name: Chris Chizinski
+    orcid: 0000-0001-9294-2588
+    email: cchizinski2@unl.edu
+    affiliations:
+      - ref: snr
+affiliations:
+  - id: snr
+    name: School of Natural Resources
+    address: 3310 Holdrege Age
+    city: Lincoln
+    state: Nebraska
+    postal-code: 68503
+date: today
+format: 
+  html:
+    theme: flatly
+    self-contained: true
+editor: source
+---
+
+## Introduction
+
+We are going to be using a document generating framework (Quarto, built off of RMarkdown) to explore how to use git and give us a background into using Quarto to generate a document.
+
+Lots of help can be found [here](https://quarto.org/docs/guide/)
+
+### YAML
+
+Open a new Quarto (.qmd) file in your project, change the author name to your name, and click "render".
+
+![](img/yaml-raw-to-rendered.png){width=600}
+
+### Committing changes
+
+Then go to the Git pane in your RStudio.
+
+If you have made changes to your Rmd file, you should see it listed here. Click on it to select it in this list and then click on **Diff**. This shows you the *diff*erence between the last committed state of the document and its current state that includes your changes. If you're happy with these changes, write "Update author name" in the [**Commit message**]{style="font-family: 'Courier New'"} box and hit [**Commit**]{style="color: red"}.
+
+![](img/update-author-name-commit.png){width=600}
+
+You don't have to commit after every change, this would get quite cumbersome. You should consider committing states that are [*meaningful to you*]{style="background-color: lightgreen"} for inspection, comparison, or restoration. In the first few assignments we will tell you exactly when to commit and in some cases, what commit message to use. [As the semester progresses we will let you make these decisions.]{style="color: orange; font-family: 'Lobster Two'; font-style: italic; font-size: 150%"}
+
+### Pushing changes
+
+Now that you have made an update and committed this change, it's time to push these changes to the web! Or more specifically, to your repo on GitHub. Why? So that others can see your changes. And by others, we mean the course teaching team (your repos in this course are private to you and us, only).
+
+## Packages
+
+In this lab we will work with two packages: **datasauRus** which contains the dataset we'll be using and **tidyverse** which is a collection of packages for doing data analysis in a "tidy" way. You can load the packages by running the following in the Console.
+
+```{r}
+#| label: our_first_chunk
+#| message: false
+#| warning: false
+
+## Install packages as needed
+# pak::pkg_install("tidyverse")
+# pak::pkg_install("datasauRus")
+
+library(tidyverse) 
+library(datasauRus)
+```
+
+Note that the packages are also loaded with the same commands in your Quarto document.
+
+## Data
+
+
+The data frame we will be working with today is called `datasaurus_dozen` and it's in the `datasauRus` package. Actually, this single data frame contains 13 datasets, designed to show us why data visualisation is important and how summary statistics alone can be misleading. The different datasets are marked by the `dataset` variable.
+
+::: {.column-margin}
+If it's confusing that the data frame is called `datasaurus_dozen` when it contains 13 datasets, you're not alone! Have you heard of a [baker's dozen](https://en.wikipedia.org/wiki/Dozen#Baker's_dozen)?
+:::
+
+To find out more about the dataset, type the following in your Console: `?datasaurus_dozen`. A question mark before the name of an object will always bring up its help file. This command must be ran in the Console.

@@ -1,0 +1,560 @@
+---
+title: "Working the tidyverse"
+subtitle: "Day 1"
+author: Chris Chizinski
+date: today
+format:
+  html:
+    embed-resources: true
+---
+
+## Basic Info
+
+```{r}
+options(stringsAsFactors = FALSE)
+
+# .libPaths("/Users/cchizinski2/Documents/RLibrary") # needs to be forward "/" or double "\\"
+.libPaths()
+```
+
+## Load library
+
+```{r}
+# install.packages("tidyverse")
+library(tidyverse)
+# install.packages("hflights")
+library(hflights) # load the library hflights
+```
+
+
+
+
+
+## tidyr 
+
+Why use 'tidyr' and 'dplyr'?
+
+1. Compared to many other packages and Base R, these are REALLY fast
+2. Readibility - the way the commands are written, flows like a 'paragraph'
+3. Chaining - you can connect multiple function into a 'paragraph'
+4. Integrates with ggplot2 - our graphics go to
+
+* Concept of tidyr and dplyr follow the tidy data concept
+
+* Backbone to chaining is the pipe %>% (originates in the magittr package 
+* The shortcuts for the pipe are 'cntrl-shift-M' in PC or 'cmd-shift-M' in mac
+
+* tidyr is designed to manipulate datasets, allowing you to go between long and wide formats, fill in missing values and combinations of data, allows you to separate or merge columns, rename and create new variables, and summrize data according to grouping variables
+
+## tidy data 
+* each variable forms a column
+* each observation forms a row
+* each type of observational unit forms a table 
+
+### The main verbs in tidyr 
+1. gather() but now called pivot_longer()
+2. spread() but now called pivot_wider()
+3. separate() and unite()
+4. complete() turns implicit missing to explicit missing by completing missing data combinations  
+
+# The main verbs in dplyr are
+1. filter() selects specific rows based on user-defined criteria
+2. select() selects specific columns based on user-defined criteria
+3. arrange() puts rows in order based on a criteria
+4. mutate() change or create a column
+5. summarise() reduces your data to a 'summary' of your data
+6. group_by() creates groups that can be operated on  
+
+# Lets wrangle 
+
+## going from wide to long
+
+```{r}
+fish_encounters  # go from wide to long format
+?fish_encounters
+
+length(unique(fish_encounters$fish))
+length(unique(fish_encounters$station))
+
+fish_encounters |> 
+  pivot_wider(names_from = station,
+              values_from = seen,
+              values_fill = list(seen = 0)) -> fish_encounters_wide
+
+dim(fish_encounters_wide)
+
+```
+
+## going long to wide
+```{r}
+
+ # make this dataset long
+
+names(billboard)
+
+billboard$wk1
+billboard |> 
+  pivot_longer(wk1:wk76,
+               names_to =  "week",
+               values_to = "values")
+
+billboard |> 
+  pivot_longer(contains('wk'),
+               names_to =  "week",
+               values_to = "values")
+
+billboard |> 
+  pivot_longer(c(-artist,-track,-date.entered),
+               names_to =  "week",
+               values_to = "values")
+```
+
+::: {.callout-note appearance="simple"}
+
+## Challenge 1
+
+Using the dataset `us_rent_income` move from long to wide format for  `income` and `rent` simultaneously
+
+:::
+
+
+```{r}
+## Challenge 1
+us_rent_income |> 
+  pivot_wider(names_from = variable,
+              values_from = c(estimate, moe))
+
+```
+
+
+::: {.callout-note appearance="simple"}
+
+## Challenge 2
+
+Using the a subset of the dataset `warpbreaks` move from long to wide format for columns A and B.  A and B should be the mean value for each of the three tensions.
+
+Result should look like:
+
+```{r}
+#| eval: false
+# A tibble: 3 × 3
+  tension     A     B
+  <fct>   <dbl> <dbl>
+1 L        44.6  28.2
+2 M        24    28.8
+3 H        24.6  18.8
+```
+
+
+:::
+
+```{r}
+# Challenge 2
+warpbreaks |> 
+  select(wool,tension, breaks) |> 
+  as_tibble() |> 
+  pivot_wider(names_from = wool,
+              values_from = breaks,
+              values_fn = list(breaks = mean))
+```
+
+## separating columns 
+
+```{r}
+mtcars |> # mtcars dataset 
+  rownames_to_column("make_model") |> 
+  as_tibble() |> 
+  separate(make_model,
+           c("make","model"),
+           sep = " ",
+           extra = "merge",
+           fill = "right",
+           remove = FALSE)
+
+?separate
+
+```
+
+## Combine columns 
+
+```{r}
+set.seed(12345)
+
+date <- seq(as.Date("2023-09-01"), as.Date("2023-09-15"), by = "day")
+hour <- sample(1:24, 15) # randomly sample 1 through 24, choosing 15 random numbers
+min <- sample(0:59, 15) # randomly sample 1 through 59, choosing 15 random numbers
+sec <- sample(0:59, 15) # randomly sample 1 through 59, choosing 15 random numbers
+event <- sample(letters, 15) #choose 15 random letters
+
+madeUpData <- data.frame(date = date,
+                         hour = hour, 
+                         min = min,
+                         sec = sec, 
+                         event = event)
+madeUpData
+```
+
+::: {.callout-note appearance="simple"}
+
+## Challenge 3
+ 
+1. Load package `lubridate`
+
+2. combine hour, min, sec into a single column called time, with the appropriate separators
+
+3. create a dateTime column that combines the date and the newly created time column. Retain the original date and time columns
+
+4. using `lubridate`, you will convert the dateTime column to a datetime class
+
+5. create a new column that is the day of the week as a character (e.g., monday tuesday wednesday)
+
+The first six rows should look like:
+
+```{r}
+#| eval: false
+  dateTime            date       time     event
+  <dttm>              <date>     <chr>    <chr>
+1 2019-09-01 14:11:31 2019-09-01 14:11:31 s    
+2 2019-09-02 19:19:24 2019-09-02 19:19:24 m    
+3 2019-09-03 16:07:35 2019-09-03 16:7:35  c    
+4 2019-09-04 11:59:39 2019-09-04 11:59:39 q    
+5 2019-09-05 02:02:10 2019-09-05 2:2:10   j    
+6 2019-09-06 21:08:37 2019-09-06 21:8:37  k
+```
+:::
+
+```{r}
+#| label: Challenge3
+
+madeUpData |> 
+  as_tibble() |> 
+  unite(c(hour, min, sec),
+        col = "time",
+        sep = ":") |> 
+  unite(c(date, time),
+        col = "date_time",
+        sep = " ",
+        remove = FALSE) |> 
+  mutate(date_time = ymd_hms(date_time),
+         weekdayz = wday(date_time,
+                         label = TRUE,
+                         abbr = FALSE))
+
+?lubridate
+
+```
+
+
+## complete()
+
+The first thing we will do is to create "fake" data to run our complete.
+
+```{r }
+#| label: fakedata
+
+fakeData <- data.frame(group = c(1:2,1),
+                       item_id = c(3:4,4),
+                       item_name = c("a", "b", "b"),
+                       value1 = c(1:3),
+                       value2 = c(4:6))
+fakeData
+```
+
+
+Now lets use complete to fill in the missing combinations 
+
+```{r }
+#| label: usecomplete
+
+fakeData |> 
+  complete(group, nesting(item_id, item_name))
+  
+```
+
+By default `complete()` fills in missing lines with `NA`.  We can fill it in with other information if we wish. 
+
+```{r }
+#| label: completezeros
+
+fakeData |> 
+  complete(group, nesting(item_id, item_name),
+           fill = list(value1 = 0,
+                       value2 = 0))
+
+```
+
+
+## Lets use some flight data
+
+```{r }
+#| label: hflights
+data(hflights) #load the data from hflights
+
+head(hflights) # look at the first 6 rows of hflights
+nrow(hflights)
+```
+
+## filter() 
+
+Choose which rows to work with
+
+```{r }
+#| label: hflightsfilter
+
+hflights |> 
+  as_tibble() |> 
+  filter(DayofMonth == 1 | DayofMonth == 2,
+         Month == 6)
+
+## Mini-challenge
+# Month 1, DayofMonth 1,6,7
+hflights |> 
+  as_tibble() |> 
+  filter(DayofMonth == c(1,6,7))
+
+hflights |> 
+  as_tibble() |> 
+  filter(Month ==1, 
+         DayofMonth %in% c(1,6,7))
+
+hflights |> 
+  as_tibble() |> 
+  filter(Month ==1, 
+         DayofMonth == 1 | DayofMonth == 6 | DayofMonth == 7)
+
+## filter for unique carrier AA
+hflights |> 
+  as_tibble() |>
+  filter(UniqueCarrier == "AA")
+
+## filter for unique carrier that is NOT AA
+hflights |> 
+  as_tibble() |>
+  filter(UniqueCarrier != "AA") # ! = 
+
+## filter for unique carrier that is NOT AA, AS, DL
+hflights |> 
+  as_tibble() |>
+  dplyr::filter(!UniqueCarrier %in% c("AA","AS","DL")) # ! =
+
+hflights |> 
+  as_tibble() |>
+  select(ArrTime) |> 
+  filter(str_detect(ArrTime, "15"))
+
+hflights |> 
+  as_tibble() |>
+  select(ArrTime) |> 
+  filter(str_detect(ArrTime, "^15|15$"))
+
+```
+
+## select()
+
+`select` chooses columns rather than rows
+
+```{r }
+#| label: useselect
+
+hflights |> 
+  as_tibble() |> 
+  select(Year, Month, TailNum) 
+
+## REmove columns with the - symbol
+hflights |> 
+  as_tibble() |> 
+  select(-Year) 
+
+## Select a consecutive sequence of columns
+hflights |> 
+  as_tibble() |> 
+  select(Year:UniqueCarrier) 
+
+## Select a consecutive sequence of columns
+hflights |> 
+  as_tibble() |> 
+  select(1:5)
+
+## use helper function - matches
+hflights |> 
+  as_tibble() |> 
+  select(matches("Taxi"))
+
+## use helper function - starts_with
+hflights |> 
+  as_tibble() |> 
+  select(starts_with("A"))
+
+## use helper function - ends_with
+hflights |> 
+  as_tibble() |> 
+  select(ends_with("e"))
+
+## use helper function - ends_with
+hflights |> 
+  as_tibble() |> 
+  select(everything())
+
+## use helper function - ends_with
+hflights |> 
+  as_tibble() |> 
+  select(ArrTime)
+```
+
+## arrange() 
+
+reorder the data based on values within a column
+
+```{r }
+#| label: usearrange
+hflights |> 
+  as_tibble() |>
+  arrange(ArrTime)
+
+hflights |> 
+  as_tibble() |>
+  arrange(desc(ArrTime))
+
+hflights |> 
+  as_tibble() |>
+  arrange(desc(ArrTime), UniqueCarrier)
+
+```
+
+## mutate() 
+
+Creates new columns or modifies existing columns in a data set 
+
+```{r }
+#| label: usemutate
+
+hflights |> 
+  as_tibble() |> 
+  select(UniqueCarrier, DepTime, ArrTime) |> 
+  mutate(TravelTime = ArrTime - DepTime,
+         TravelTime_hrs = TravelTime/60,
+         junkColumn = "ABCDEF")
+
+hflights |> 
+  as_tibble() |> 
+  select(UniqueCarrier, DepTime, ArrTime) |> 
+  mutate(row_id = row_number())
+
+hflights |> 
+  as_tibble() |> 
+  select(UniqueCarrier, DepTime, ArrTime) |> 
+  mutate(UniqueCarrier = as.factor(UniqueCarrier),
+         DepTime = DepTime/60)
+
+
+```
+
+## summarise()
+ Similar to mutate, but it returns a new "summarized" dataset
+ 
+```{r }
+#| label: usesummarise
+
+hflights |> 
+  as_tibble() |> 
+  select(UniqueCarrier, DepTime, ArrTime) |>
+  drop_na() |> 
+  group_by(UniqueCarrier) |> 
+  summarise(mean_depart = mean(DepTime),
+            sd_depart = sd(DepTime),
+            cv_depart = sd_depart/mean_depart)
+
+hflights |> 
+  as_tibble() |> 
+  select(UniqueCarrier, DepTime, ArrTime) |>
+  drop_na() |> 
+  group_by(UniqueCarrier) |> 
+  mutate(mean_depart = mean(DepTime)) |> 
+  filter(UniqueCarrier == "AS")
+
+
+#calculate the mean, standard deviation, and coeficient of variation by unique carrier
+
+
+
+```
+
+::: {.callout-note appearance="simple"}
+
+## Challenge 4 - **The Big One**
+ 
+1. Read in the csv data using `read_csv` the `FAO_GlobalProduction.csv` from "https://raw.githubusercontent.com/chrischizinski/SNR_R_Data/3a0c1c34c8792e79fbce7277d216cadd84ecc973/FAO_GlobalProduction.csv"
+2. Convert from **wide** to **long** format to variables `year` and `prod`
+3. Rename the columns.  
+  * all columns to lowercase
+  * 'Country (Country)' to country
+  * 'Species (ASFIS species)' to common_name
+  * 'Production area (FAO major fishing area)' to prod_area
+  * 'Production source (Detailed production source)' to prod_source
+  * 'Measure (Measure)' to measure
+4. In prod, change '...' to NA
+5. Make `year` a column of numeric values
+6. keep only rows with `Capture production`, `Quantity (tonnes)`, and without `NA` in measure.  remove aquaculture as a prod_source
+7. Create a new column called `inland` which is a binary value of whether the region is inland or not
+8. Arrange by country, common_name, and year
+9.  Create a new column called log_catch that is the natural log (prod + 1)
+11. Calculate the mean log lifetime catch and coefficient of variation for each type of fishery (prod) in each country, common_name, prod_area, and prod_source
+12. Filter out fisheries with short time series (< 10 yrs)
+
+The first six rows of your result should look like:
+
+```{r}
+#| eval: false
+# Groups:   country, common_name, prod_area [6]
+  country     common_name                  prod_area                   prod_source      mean_…¹ cv_ca…²     N
+  <chr>       <chr>                        <chr>                       <chr>              <dbl>   <dbl> <int>
+1 Afghanistan Freshwater fishes nei        Asia - Inland waters        Capture product…    6.33  0.0892    65
+2 Albania     Angelsharks, sand devils nei Mediterranean and Black Sea Capture product…    2.93  0.388     19
+3 Albania     Atlantic bonito              Mediterranean and Black Sea Capture product…    2.47  0.369     19
+4 Albania     Bleak                        Europe - Inland waters      Capture product…    5.51  0.0565    20
+5 Albania     Bogue                        Mediterranean and Black Sea Capture product…    5.17  0.115     32
+6 Albania     Caramote prawn               Mediterranean and Black Sea Capture product…    3.93  0.484     20
+```
+:::
+
+```{r}
+#| label: BigChallenge
+library(tidyverse)
+
+fao_data <- read_csv("https://raw.githubusercontent.com/chrischizinski/SNR_R_Data/3a0c1c34c8792e79fbce7277d216cadd84ecc973/FAO_GlobalProduction.csv")
+names(fao_data) 
+
+# pak:pkg_install('janitor')
+
+fao_data |> 
+  janitor::clean_names() |> 
+  pivot_longer(x1950:x2014,
+               names_to = "year",
+               values_to = "prod") |> 
+  rename(country = country_country,
+         common_name = species_asfis_species,
+         prod_area = production_area_fao_major_fishing_area,
+         prod_source = production_source_detailed_production_source,
+         measure = measure_measure) |> 
+  mutate(prod = na_if(prod, "..."),
+         year = str_remove(year, "x"),
+         prod = str_replace(prod, "0 0", "0"),
+         year = as.numeric(year),
+         prod = as.numeric(prod)) |> 
+  filter(prod_source == "Capture production",
+         measure == "Quantity (tonnes)",
+         !is.na(prod)) |> 
+  mutate(inland = ifelse(str_detect(prod_area, "Inland"), 1, 0)) |> 
+  arrange(country, common_name, year) |> 
+  mutate(log_catch = log(prod + 1)) |> 
+  group_by(country, common_name, prod_area, prod_source) |> 
+  summarise(mean_prod = mean(log_catch),
+            sd_prod = sd(log_catch),
+            n_years = n()) |> 
+  filter(n_years >= 10) |> 
+  ungroup() -> fao_summarized
+  
+fao_summarized
+  
+```
+
