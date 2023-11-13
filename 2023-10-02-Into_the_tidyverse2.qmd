@@ -519,7 +519,10 @@ The first six rows of your result should look like:
 
 ```{r}
 #| label: BigChallenge
+<<<<<<< HEAD
 library(tidyverse)
+=======
+>>>>>>> 6cde87bae205aa8353174705cafa7a37a7cd03d2
 
 fao_data <- read_csv("https://raw.githubusercontent.com/chrischizinski/SNR_R_Data/3a0c1c34c8792e79fbce7277d216cadd84ecc973/FAO_GlobalProduction.csv")
 names(fao_data) 
@@ -538,6 +541,7 @@ fao_data |>
          measure = measure_measure) |> 
   mutate(prod = na_if(prod, "..."),
          year = str_remove(year, "x"),
+<<<<<<< HEAD
          prod = str_replace(prod, "0 0", "0"),
          year = as.numeric(year),
          prod = as.numeric(prod)) |> 
@@ -555,6 +559,10 @@ fao_data |>
   ungroup() -> fao_summarized
   
 fao_summarized
+=======
+         year = as.numeric(year),
+         prod = as.numeric(prod))
+>>>>>>> 6cde87bae205aa8353174705cafa7a37a7cd03d2
   
 ```
 
