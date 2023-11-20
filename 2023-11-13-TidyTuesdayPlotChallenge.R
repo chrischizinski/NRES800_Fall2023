@@ -122,7 +122,7 @@ all_countries |>
          xmax = cuml_hrs,
          ymin = 0,
          ymax = ymin + box_width,
-         segment_y = ifelse(row_number() %% 2 == 0,ymax + 0.05, ymax + 0.15),
+         segment_y = ifelse(row_number() %% 2 == 0, ymax + 0.05, ymax + 0.15),
          segment_y = case_match(category,
                                 "Nonfood\nprovision" ~ 0.61,
                                 .default = segment_y),
